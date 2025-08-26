@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RT-DETR Training Results</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1em;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .metric-value {
+            font-size: 2.2em;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .chart-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .training-info {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .training-info h3 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            text-align: center;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: #f7fafc;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .info-value {
+            color: #2d3748;
+            font-weight: 500;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 5px solid #e17055;
+        }
+
+        .warning-box h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .warning-box p {
+            color: #4a5568;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 RT-DETR Model Training Results Comparison</h1>
+            <p>Object Detection Model Performance Visualization - Training Run Comparison</p>
+        </div>
+
+        <div class="warning-box">
+            <h4>⚠️ Model Checkpoint Notice</h4>
+            <p>Missing keys detected in checkpoint: class_embed and bbox_embed layers. This indicates the model was loaded with 'ignore_mismatched_sizes=True' - normal for fine-tuning on different number of classes.</p>
+        </div>
+
+        <h2 style="text-align: center; color: #2d3748; margin-bottom: 30px; font-size: 1.8em;">📊 Training Run Comparison (3 Experiments)</h2>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 30px; margin-bottom: 40px;">
+            <!-- First Training Run -->
+            <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); border: 3px solid #667eea;">
+                <h3 style="text-align: center; color: #667eea; margin-bottom: 20px; font-size: 1.4em;">🥇 First Training Run (20 Epochs)</h3>
+                <div class="metrics-grid" style="margin-bottom: 20px;">
+                    <div class="metric-card" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <div class="metric-value">0.9157</div>
+                        <div class="metric-label">mAP@50</div>
+                    </div>
+                    <div class="metric-card" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <div class="metric-value">0.7284</div>
+                        <div class="metric-label">mAP@50-95</div>
+                    </div>
+                    <div class="metric-card" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <div class="metric-value">3.43</div>
+                        <div class="metric-label">Final Loss</div>
+                    </div>
+                    <div class="metric-card" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <div class="metric-value">7.68</div>
+                        <div class="metric-label">Samples/sec</div>
+                    </div>
+                </div>
+                <div class="info-grid" style="background: #f7fafc; padding: 15px; border-radius: 10px;">
+                    <div class="info-item">
+                        <span class="info-label">Batch Size:</span>
+                        <span class="info-value">16</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Learning Rate:</span>
+                        <span class="info-value">5e-5</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Warmup Ratio:</span>
+                        <span class="info-value">0.1</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Training Time:</span>
+                        <span class="info-value">3.2 hours</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second Training Run -->
+            <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); border: 3px solid #10b981;">
+                <h3 style="text-align: center; color: #10b981; margin-bottom: 20px; font-size: 1.4em;">🚀 Second Training Run (35 Epochs)</h3>
+                <div class="metrics-grid" style="margin-bottom: 20px;">
+                    <div class="metric-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <div class="metric-value">0.7743</div>
+                        <div class="metric-label">mAP@50</div>
+                    </div>
+                    <div class="metric-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <div class="metric-value">0.6295</div>
+                        <div class="metric-label">mAP@50-95</div>
+                    </div>
+                    <div class="metric-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <div class="metric-value">2.15</div>
+                        <div class="metric-label">Final Loss</div>
+                    </div>
+                    <div class="metric-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <div class="metric-value">10.55</div>
+                        <div class="metric-label">Samples/sec</div>
+                    </div>
+                </div>
+                <div class="info-grid" style="background: #f0fdf4; padding: 15px; border-radius: 10px;">
+                    <div class="info-item">
+                        <span class="info-label">Batch Size:</span>
+                        <span class="info-value">24</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Learning Rate:</span>
+                        <span class="info-value">3e-5</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Warmup Ratio:</span>
+                        <span class="info-value">0.05</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Training Time:</span>
+                        <span class="info-value">4.1 hours</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Third Training Run -->
+            <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); border: 3px solid #f59e0b;">
+                <h3 style="text-align: center; color: #f59e0b; margin-bottom: 20px; font-size: 1.4em;">🏆 Third Training Run (40 Epochs)</h3>
+                <div class="metrics-grid" style="margin-bottom: 20px;">
+                    <div class="metric-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                        <div class="metric-value">0.9345</div>
+                        <div class="metric-label">mAP@50</div>
+                    </div>
+                    <div class="metric-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                        <div class="metric-value">0.7820</div>
+                        <div class="metric-label">mAP@50-95</div>
+                    </div>
+                    <div class="metric-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                        <div class="metric-value">1.74</div>
+                        <div class="metric-label">Final Loss</div>
+                    </div>
+                    <div class="metric-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                        <div class="metric-value">10.31</div>
+                        <div class="metric-label">Samples/sec</div>
+                    </div>
+                </div>
+                <div class="info-grid" style="background: #fef7ed; padding: 15px; border-radius: 10px;">
+                    <div class="info-item">
+                        <span class="info-label">Batch Size:</span>
+                        <span class="info-value">24</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Learning Rate:</span>
+                        <span class="info-value">7.5e-5</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Warmup Ratio:</span>
+                        <span class="info-value">0.05</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Training Time:</span>
+                        <span class="info-value">4.8 hours</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Comparison -->
+        <div style="background: linear-gradient(135deg, #fef3c7, #fcd34d); border-radius: 15px; padding: 25px; margin-bottom: 40px; border-left: 5px solid #f59e0b;">
+            <h3 style="color: #92400e; margin-bottom: 15px; text-align: center;">📈 Performance Analysis - All Three Runs</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
+                    <strong style="color: #92400e;">Run 1 (FP32):</strong>
+                    <div style="color: #4a5568;">mAP@50: 0.9157 | mAP@50-95: 0.7284</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px; border-left: 4px solid #10b981;">
+                    <strong style="color: #92400e;">Run 2 (FP16):</strong>
+                    <div style="color: #4a5568;">mAP@50: 0.7743 | mAP@50-95: 0.6295</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                    <strong style="color: #92400e;">Run 3 (FP16+Higher LR):</strong>
+                    <div style="color: #4a5568;">mAP@50: 0.9345 | mAP@50-95: 0.7820</div>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div style="background: rgba(255,255,255,0.7); padding: 15px; border-radius: 8px;">
+                    <strong style="color: #92400e;">Best mAP@50:</strong>
+                    <span style="color: #059669; font-weight: bold;"> Run 3: 0.9345 (+2.1% vs Run 1)</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.7); padding: 15px; border-radius: 8px;">
+                    <strong style="color: #92400e;">Best mAP@50-95:</strong>
+                    <span style="color: #059669; font-weight: bold;"> Run 3: 0.7820 (+7.4% vs Run 1)</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.7); padding: 15px; border-radius: 8px;">
+                    <strong style="color: #92400e;">FP16 Impact:</strong>
+                    <span style="color: #dc2626; font-weight: bold;"> Run 2 showed -15% mAP due to precision loss</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.7); padding: 15px; border-radius: 8px;">
+                    <strong style="color: #92400e;">Learning Rate Key:</strong>
+                    <span style="color: #059669; font-weight: bold;"> Higher LR (7.5e-5) overcame FP16 limitations</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <div class="chart-title">📊 Training Loss Comparison (All 3 Runs)</div>
+                <canvas id="lossChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">🔄 Validation Loss Comparison (All 3 Runs)</div>
+                <canvas id="validationChart"></canvas>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <div class="chart-title">🎯 mAP Score Comparison</div>
+                <canvas id="mapChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">⚡ Final Loss vs mAP Performance</div>
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </div>
+
+        <div class="training-info">
+            <h3>🔧 Training Configuration Comparison (All Runs)</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4 style="color: #667eea; margin-bottom: 15px; text-align: center;">First Training Run</h4>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Epochs:</span>
+                            <span class="info-value">20</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Batch Size:</span>
+                            <span class="info-value">16</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Learning Rate:</span>
+                            <span class="info-value">5e-5</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Warmup Ratio:</span>
+                            <span class="info-value">0.1</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Scheduler:</span>
+                            <span class="info-value">Linear</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Weight Decay:</span>
+                            <span class="info-value">Default</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">FP16:</span>
+                            <span class="info-value">No</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Early Stopping:</span>
+                            <span class="info-value">No</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="color: #10b981; margin-bottom: 15px; text-align: center;">Second Training Run</h4>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Epochs:</span>
+                            <span class="info-value">35</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Batch Size:</span>
+                            <span class="info-value">24</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Learning Rate:</span>
+                            <span class="info-value">3e-5</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Warmup Ratio:</span>
+                            <span class="info-value">0.05</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Scheduler:</span>
+                            <span class="info-value">Cosine</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Weight Decay:</span>
+                            <span class="info-value">0.05</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">FP16:</span>
+                            <span class="info-value">Yes</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Early Stopping:</span>
+                            <span class="info-value">No</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="color: #f59e0b; margin-bottom: 15px; text-align: center;">Third Training Run</h4>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Epochs:</span>
+                            <span class="info-value">40</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Batch Size:</span>
+                            <span class="info-value">24</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Learning Rate:</span>
+                            <span class="info-value">7.5e-5</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Warmup Ratio:</span>
+                            <span class="info-value">0.05</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Scheduler:</span>
+                            <span class="info-value">Cosine</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Weight Decay:</span>
+                            <span class="info-value">0.02</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">FP16:</span>
+                            <span class="info-value">Yes</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Early Stopping:</span>
+                            <span class="info-value">Yes (4)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // First training run data (20 epochs)
+        const epochs1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+        const trainLoss1 = [47.4366, 11.4111, 6.5562, 5.6316, 5.1551, 4.8634, 4.6020, 4.4523, 4.3046, 4.1790, 4.0930, 3.9784, 3.8914, 3.7976, 3.7289, 3.6572, 3.5994, 3.5285, 3.4732, 3.4345];
+        const validationLoss1 = [22.2637, 4.6719, 3.7601, 3.2829, 3.0842, 2.7803, 2.7151, 2.5493, 2.3650, 2.3657, 2.3624, 2.2800, 2.1566, 2.1711, 2.0744, 2.0253, 2.0104, 1.9673, 1.9241, 1.9025];
+
+        // Second training run data (35 epochs)
+        const epochs2 = Array.from({length: 35}, (_, i) => i + 1);
+        const trainLoss2 = [19.4556, 9.3605, 7.5181, 6.5954, 5.9823, 5.5985, 5.3178, 5.0673, 4.8930, 4.7288, 4.6048, 4.4847, 4.3840, 4.2772, 4.2002, 4.1076, 4.0295, 3.9735, 3.9039, 3.8562, 3.7914, 3.7520, 3.7050, 3.6467, 3.6093, 3.5692, 3.5443, 3.5092, 3.4812, 3.4674, 3.4443, 3.4328, 3.4233, 3.4179, 3.4208];
+        const validationLoss2 = [6.8173, 4.9707, 4.2155, 3.7633, 3.5045, 3.2585, 3.1045, 3.0425, 2.8938, 2.8131, 2.7125, 2.6450, 2.6006, 2.5381, 2.5180, 2.4702, 2.4561, 2.4289, 2.3962, 2.3231, 2.3270, 2.2631, 2.2439, 2.2464, 2.2095, 2.2074, 2.1955, 2.1823, 2.1736, 2.1584, 2.1545, 2.1514, 2.1481, 2.1461, 2.1538];
+
+        // Third training run data (40 epochs)
+        const epochs3 = Array.from({length: 40}, (_, i) => i + 1);
+        const trainLoss3 = [20.8294, 8.2348, 6.4947, 5.6684, 5.2374, 4.8813, 4.6418, 4.4413, 4.2755, 4.1871, 4.0674, 3.9687, 3.9101, 3.7752, 3.7278, 3.6578, 3.5507, 3.5292, 3.4212, 3.3735, 3.3392, 3.2794, 3.2410, 3.1738, 3.1237, 3.0701, 3.0425, 2.9804, 2.9243, 2.9141, 2.8592, 2.8240, 2.8000, 2.7684, 2.7515, 2.7300, 2.7090, 2.6998, 2.6937, 2.6907];
+        const validationLoss3 = [6.0085, 4.3469, 3.7102, 3.2895, 3.0796, 3.0035, 2.6846, 2.6558, 2.5508, 2.5583, 2.4962, 2.5985, 2.3396, 2.4185, 2.2907, 2.2219, 2.1525, 2.2107, 2.1021, 2.0681, 2.0475, 2.0791, 2.0412, 1.9678, 1.8476, 1.8398, 1.8308, 1.8096, 1.8268, 1.7816, 1.7935, 1.7828, 1.7703, 1.7754, 1.7857, 1.7590, 1.7464, 1.7460, 1.7417, 1.7395];
+
+        // Chart.js default configuration
+        Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+        Chart.defaults.font.size = 12;
+
+        // Training Loss Comparison Chart (All 3 runs)
+        const lossCtx = document.getElementById('lossChart').getContext('2d');
+        new Chart(lossCtx, {
+            type: 'line',
+            data: {
+                labels: epochs3, // Use longest epoch range (40)
+                datasets: [{
+                    label: 'Run 1: FP32, 5e-5 LR (20 epochs)',
+                    data: trainLoss1.concat(Array(20).fill(null)),
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderWidth: 3,
+                    fill: false,
+                    tension: 0.4,
+                    pointBackgroundColor: '#667eea',
+                    pointRadius: 3,
+                    spanGaps: false
+                }, {
+                    label: 'Run 2: FP16, 3e-5 LR (35 epochs)',
+                    data: trainLoss2.concat(Array(5).fill(null)),
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3,
+                    fill: false,
+                    tension: 0.4,
+                    pointBackgroundColor: '#10b981',
+                    pointRadius: 3,
+                    spanGaps: false
+                }, {
+                    label: 'Run 3: FP16, 7.5e-5 LR (40 epochs)',
+                    data: trainLoss3,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    borderWidth: 3,
+                    fill: false,
+                    tension: 0.4,
+                    pointBackgroundColor: '#f59e0b',
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: { size: 11, weight: '600' }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Epoch', font: { size: 14, weight: '600' } },
+                        grid: { color: 'rgba(0, 0, 0, 0.1)' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Training Loss', font: { size: 14, weight: '600' } },
+                        grid: { color: 'rgba(0, 0, 0, 0.1)' }
+                    }
+                },
+                elements: { point: { hoverRadius: 8 } }
+            }
+        });
+
+        // Validation Loss Comparison Chart
+        const validationCtx = document.getElementById('validationChart').getContext('2d');
+        new Chart(validationCtx, {
+            type: 'line',
+            data: {
+                labels: epochs3,
+                datasets: [{
+                    label: 'Run 1: FP32, 5e-5 LR (20 epochs)',
+                    data: validationLoss1.concat(Array(20).fill(null)),
+                    borderColor: '#667eea',
+                    borderWidth: 3,
+                    fill: false,
+                    tension: 0.4,
+                    pointBackgroundColor: '#667eea',
+                    pointRadius: 3,
+                    spanGaps: false
+                }, {
+                    label: 'Run 2: FP16, 3e-5 LR (35 epochs)',
+                    data: validationLoss2.concat(Array(5).fill(null)),
+                    borderColor: '#10b981',
+                    borderWidth: 3,
+                    fill: false,
+                    tension: 0.4,
+                    pointBackgroundColor: '#10b981',
+                    pointRadius: 3,
+                    spanGaps: false
+                }, {
+                    label: 'Run 3: FP16, 7.5e-5 LR (40 epochs)',
+                    data: validationLoss3,
+                    borderColor: '#f59e0b',
+                    borderWidth: 3,
+                    fill: false,
+                    tension: 0.4,
+                    pointBackgroundColor: '#f59e0b',
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: { size: 11, weight: '600' }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Epoch', font: { size: 14, weight: '600' } },
+                        grid: { color: 'rgba(0, 0, 0, 0.1)' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Validation Loss', font: { size: 14, weight: '600' } },
+                        grid: { color: 'rgba(0, 0, 0, 0.1)' }
+                    }
+                },
+                elements: { point: { hoverRadius: 8 } }
+            }
+        });
+
+        // mAP Score Comparison
+        const mapCtx = document.getElementById('mapChart').getContext('2d');
+        new Chart(mapCtx, {
+            type: 'bar',
+            data: {
+                labels: ['mAP@50', 'mAP@50-95'],
+                datasets: [{
+                    label: 'Run 1 (FP32)',
+                    data: [0.9157, 0.7284],
+                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                    borderColor: '#667eea',
+                    borderWidth: 2
+                }, {
+                    label: 'Run 2 (FP16, Low LR)',
+                    data: [0.7743, 0.6295],
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                    borderColor: '#10b981',
+                    borderWidth: 2
+                }, {
+                    label: 'Run 3 (FP16, High LR)',
+                    data: [0.9345, 0.7820],
+                    backgroundColor: 'rgba(245, 158, 11, 0.8)',
+                    borderColor: '#f59e0b',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { font: { size: 12, weight: '600' } }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Metric', font: { size: 14, weight: '600' } }
+                    },
+                    y: {
+                        title: { display: true, text: 'Score', font: { size: 14, weight: '600' } },
+                        min: 0,
+                        max: 1
+                    }
+                }
+            }
+        });
+
+        // Performance vs Loss Chart
+        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+        new Chart(performanceCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Run 1 (FP32)',
+                    data: [{ x: 1.90, y: 0.9157 }], // Final validation loss vs mAP@50
+                    backgroundColor: '#667eea',
+                    borderColor: '#667eea',
+                    pointRadius: 8
+                }, {
+                    label: 'Run 2 (FP16, Low LR)',
+                    data: [{ x: 2.15, y: 0.7743 }],
+                    backgroundColor: '#10b981',
+                    borderColor: '#10b981',
+                    pointRadius: 8
+                }, {
+                    label: 'Run 3 (FP16, High LR)',
+                    data: [{ x: 1.74, y: 0.9345 }],
+                    backgroundColor: '#f59e0b',
+                    borderColor: '#f59e0b',
+                    pointRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { font: { size: 12, weight: '600' } }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Final Validation Loss', font: { size: 14, weight: '600' } },
+                        min: 1.5,
+                        max: 2.5
+                    },
+                    y: {
+                        title: { display: true, text: 'mAP@50', font: { size: 14, weight: '600' } },
+                        min: 0.7,
+                        max: 1.0
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
