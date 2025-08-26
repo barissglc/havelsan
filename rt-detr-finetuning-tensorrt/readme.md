@@ -15,9 +15,6 @@ Bu klasörde `rt_detr_finetuning_LAST.ipynb` defterinde gerçekleştirilen RT-DE
 
 Kullanım İpuçları
 -----------------
-- Ortam değişkenlerini (API anahtarları) doğrudan koda yazmak yerine PowerShell’de:  
-	`$Env:ROBOFLOW_API_KEY = "YOUR_KEY"`  
-	`$Env:WANDB_API_KEY    = "YOUR_KEY"`
 - Eğitim: Defterdeki ilgili hücreleri sırasıyla çalıştırın; VRAM yetersizse `per_device_train_batch_size` düşürüp `gradient_accumulation_steps` artırın.
 - TensorRT derlemesi için: `pip install torch-tensorrt` (PyTorch ve CUDA sürüm uyumuna dikkat edin).
 - Inference giriş boyutunu (1920x1080 -> 1088 pad) değiştirmek isterseniz TensorRT engine’i yeniden derlemeniz gerekir.

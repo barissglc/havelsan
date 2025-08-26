@@ -81,11 +81,7 @@ Bu bölümde Roboflow üzerinden indirilen özel veri seti üzerinde **RT-DETR (
 - TensorRT: `torch_tensorrt.compile` ile engine oluşturulur; FP16 başarısız olursa FP32 fallback.
 - Video Inference: Warmup, zamanlama, ortalama/anlık FPS, kutu çizimi ve çıktı video kaydı.
 
-Hızlı Başlangıç (PowerShell):
-```powershell
-# API anahtarlarını ortam değişkeni olarak ayarlayın
-$Env:ROBOFLOW_API_KEY = "YOUR_KEY"
-$Env:WANDB_API_KEY    = "YOUR_KEY"   # (opsiyonel izlemede)
+
 
 # Gerekli paketler
 pip install -U transformers accelerate supervision roboflow albumentations torchmetrics torch-tensorrt
