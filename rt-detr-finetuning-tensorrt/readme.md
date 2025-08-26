@@ -1,5 +1,4 @@
-RT-DETR Fine-Tuning & TensorRT Inference
-==================================================
+# RT-DETR Fine-Tuning & TensorRT Inference
 
 Bu klasörde `rt_detr_finetuning_LAST.ipynb` defterinde gerçekleştirilen RT-DETR tabanlı nesne tespiti fine-tune süreci ve sonrasında TensorRT hızlandırmalı çıkarım (inference) adımları özetlenmiştir.
 

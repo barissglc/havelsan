@@ -5,6 +5,7 @@
 1.  **Sis Giderme (Fog Removal)**: Görüntülerdeki sis ve pusu ortadan kaldırmak için "Dark Channel Prior" algoritmasını kullanan bir Python betiği.
 2.  **GAN ile Görüntü Üretimi**: PyTorch kullanılarak geliştirilmiş bir DCGAN (Deep Convolutional Generative Adversarial Network) ile tekne/gemi görselleri üreten bir proje.
 3.  **Stable Diffusion ile Görüntüden Görüntüye Dönüşüm**: Stable Diffusion 3.5 ve IP-Adapter kullanarak mevcut görselleri yeniden yorumlayan ve iyileştiren Jupyter Notebook tabanlı bir proje.
+4.  **RT-DETR Fine-Tuning & TensorRT**: Özel veri seti üzerinde RT-DETR modelinin fine-tune edilmesi ve Torch-TensorRT VE ONNX ile gerçek zamanlı hızlandırılmış çıkarım.
 
 ---
 
