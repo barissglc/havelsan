@@ -1,4 +1,4 @@
-# Görüntü İşleme ve Üretme Projeleri Koleksiyonu
+# HAVELSAN STAJ
 
 ⚠️⚠️️️⚠️️️️️ **Önemli Not**: Bu repo gizlilik bilgisi içermemektedir. Burada paylaşılan kodlar ve yapay zeka modelleri, şirket içi yapılan diğer çalışmalardan tamamen ayrıdır. Staj süresince şirket için yaptığım diğer çalışmalar gizlidir ve asla paylaşılmamıştır. (Gizlilik içeren bilgiler, fotoğraflar, LLM Çalışmaları vb.) ⚠️️️⚠️️️⚠️️️
 
@@ -97,3 +97,4 @@ Notlar:
 - FP16 derlemesi hata verirse otomatik FP32 ile devam edebilirsiniz.
 
 Detaylı anlatım, grafikler ve sonuçlar için: [`rt-detr-finetuning-tensorrt/readme.md`](rt-detr-finetuning-tensorrt/readme.md) ve defter: `rt-detr-finetuning-tensorrt/rt_detr_finetuning_LAST.ipynb`.
+
